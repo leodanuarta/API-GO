@@ -2,8 +2,8 @@ package productcontroller
 
 import (
 	"api-go/models"
+	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -72,14 +72,18 @@ func Update(c *gin.Context) {
 func Delete(c *gin.Context) {
 	var product models.Product
 
-	input := map[string]string{"id": "0"}
+	// input := map[string]string{"id": "0"}
+
+	var input struct {
+		Id json.Number
+	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	id, _ := strconv.ParseInt(input["id"], 10, 64)
+	id, _ := input.Id.Int64()
 
 	if models.DB.Delete(&product, id).RowsAffected == 0 {
 		if err := c.ShouldBindJSON(&product); err != nil {
